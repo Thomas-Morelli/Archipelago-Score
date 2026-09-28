@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e2a38">
+<title>Archipelago Score</title>
+
+<style>
+:root{
+  --navy:#0e2a38;
+  --paper:#fffaf0;
+  --ink:#10232d;
+  --gold:#c7a45a;
+  --muted:#64767d;
+}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+  margin:0;
+  min-height:100%;
+  font-family:ui-serif, Georgia, "Times New Roman", serif;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255,255,255,.08), transparent 30%),
+    linear-gradient(165deg,#0e2a38,#12394a 55%,#0a202b);
+  color:white;
+  user-select:none;
+}
+
+body{
+  min-height:100dvh;
+  display:flex;
+  justify-content:center;
+  padding:
+    max(14px,env(safe-area-inset-top))
+    max(14px,env(safe-area-inset-right))
+    max(14px,env(safe-area-inset-bottom))
+    max(14px,env(safe-area-inset-left));
+}
+
+.app{
+  width:min(100%,560px);
+  min-height:calc(100dvh - 28px);
+  display:grid;
+  grid-template-rows:auto auto 1fr 1fr auto;
+  gap:12px;
+}
+
+.brand{
+  text-align:center;
+  font-weight:900;
+  letter-spacing:.14em;
+  font-size:clamp(20px,5vw,30px);
+}
+
+.score{
+  background:rgba(255,250,240,.97);
+  color:var(--ink);
+  border:2px solid var(--gold);
+  border-radius:22px;
+  padding:12px 18px 11px;
+  text-align:center;
+  box-shadow:0 12px 30px rgba(0,0,0,.22);
+}
+
+.score-label{
+  font-family:ui-sans-serif,system-ui,sans-serif;
+  font-size:12px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.18em;
+  color:var(--muted);
+}
+
+.total{
+  font-family:ui-sans-serif,system-ui,sans-serif;
+  font-size:clamp(58px,16vw,92px);
+  font-weight:950;
+  line-height:.95;
+  margin-top:3px;
+}
+
+.formula{
+  font-family:ui-sans-serif,system-ui,sans-serif;
+  font-size:14px;
+  color:#50636b;
+  margin-top:5px;
+}
+
+.counter{
+  min-height:0;
+  display:grid;
+  grid-template-rows:1fr 52px;
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.22),
+    0 12px 28px rgba(0,0,0,.22);
+}
+
+.influence{
+  background:
+    radial-gradient(circle at 30% 18%,rgba(255,255,255,.14),transparent 27%),
+    linear-gradient(145deg,#d2b16a,#b28a42 55%,#8f6b2d);
+  border:2px solid rgba(243,234,214,.38);
+}
+
+.merit{
+  background:
+    radial-gradient(circle at 30% 18%,rgba(255,255,255,.12),transparent 27%),
+    linear-gradient(145deg,#1a5f78,#123e54);
+  border:2px solid rgba(117,193,216,.34);
+}
+
+.add-btn,
+.minus-btn{
+  border:0;
+  color:white;
+  cursor:pointer;
+  touch-action:manipulation;
+  font:inherit;
+}
+
+.add-btn{
+  background:transparent;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  width:100%;
+  min-height:0;
+  padding:10px;
+}
+
+.add-btn:active{
+  filter:brightness(1.10);
+  transform:scale(.992);
+}
+
+.name{
+  font-family:ui-sans-serif,system-ui,sans-serif;
+  font-size:clamp(14px,4vw,19px);
+  font-weight:900;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  opacity:.92;
+}
+
+.value{
+  font-family:ui-sans-serif,system-ui,sans-serif;
+  font-size:clamp(72px,22vw,126px);
+  font-weight:950;
+  line-height:.88;
+  margin:8px 0 5px;
+  font-variant-numeric:tabular-nums;
+}
+
+.tap{
+  font-family:ui-sans-serif,system-ui,sans-serif;
+  font-size:12px;
+  opacity:.73;
+}
+
+.minus-btn{
+  width:100%;
+  background:rgba(0,0,0,.18);
+  border-top:1px solid rgba(255,255,255,.20);
+  font-family:ui-sans-serif,system-ui,sans-serif;
+  font-size:18px;
+  font-weight:900;
+  letter-spacing:.04em;
+}
+
+.minus-btn:active{
+  background:rgba(0,0,0,.32);
+}
+
+.footer{
+  text-align:center;
+  font-family:ui-sans-serif,system-ui,sans-serif;
+  font-size:12px;
+  color:rgba(255,255,255,.62);
+  padding-bottom:2px;
+}
+
+@media (orientation:landscape) and (max-height:600px){
+  body{padding:10px}
+  .app{
+    width:min(100%,900px);
+    min-height:calc(100dvh - 20px);
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:auto auto 1fr auto;
+    gap:10px;
+  }
+  .brand,.score,.footer{grid-column:1/-1}
+  .score{padding:7px 12px}
+  .total{font-size:42px}
+  .value{font-size:70px}
+  .counter{grid-template-rows:1fr 42px;border-radius:20px}
+}
+</style>
+</head>
+
+<body>
+<main class="app">
+  <div class="brand">ARCHIPELAGO</div>
+
+  <section class="score" aria-live="polite">
+    <div class="score-label">Total Score</div>
+    <div class="total" id="total">3</div>
+    <div class="formula">
+      <span id="infSmall">3</span> Influence +
+      <span id="merSmall">0</span> Merit
+    </div>
+  </section>
+
+  <section class="counter influence">
+    <button class="add-btn" id="influencePlus" type="button" aria-label="Add one Influence">
+      <div class="name">Influence</div>
+      <div class="value" id="influence">3</div>
+      <div class="tap">tap anywhere to add +1</div>
+    </button>
+    <button class="minus-btn" id="influenceMinus" type="button">−1 Influence</button>
+  </section>
+
+  <section class="counter merit">
+    <button class="add-btn" id="meritPlus" type="button" aria-label="Add one Merit">
+      <div class="name">Merit</div>
+      <div class="value" id="merit">0</div>
+      <div class="tap">tap anywhere to add +1</div>
+    </button>
+    <button class="minus-btn" id="meritMinus" type="button">−1 Merit</button>
+  </section>
+
+  <div class="footer">Score saves automatically on this device.</div>
+</main>
+
+<script>
+(() => {
+  const STORAGE_KEY = "archipelago-score-v4";
+
+  let state = { influence: 3, merit: 0 };
+
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Number.isFinite(parsed.influence) && Number.isFinite(parsed.merit)) {
+        state = parsed;
+      }
+    }
+  } catch (_) {}
+
+  const influenceEl = document.getElementById("influence");
+  const meritEl = document.getElementById("merit");
+  const totalEl = document.getElementById("total");
+  const infSmallEl = document.getElementById("infSmall");
+  const merSmallEl = document.getElementById("merSmall");
+
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (_) {}
+  }
+
+  function render() {
+    influenceEl.textContent = state.influence;
+    meritEl.textContent = state.merit;
+    totalEl.textContent = state.influence + state.merit;
+    infSmallEl.textContent = state.influence;
+    merSmallEl.textContent = state.merit;
+    save();
+  }
+
+  function haptic() {
+    if (navigator.vibrate) navigator.vibrate(15);
+  }
+
+  document.getElementById("influencePlus").addEventListener("click", () => {
+    state.influence += 1;
+    haptic();
+    render();
+  });
+
+  document.getElementById("meritPlus").addEventListener("click", () => {
+    state.merit += 1;
+    haptic();
+    render();
+  });
+
+  document.getElementById("influenceMinus").addEventListener("click", () => {
+    state.influence = Math.max(3, state.influence - 1);
+    haptic();
+    render();
+  });
+
+  document.getElementById("meritMinus").addEventListener("click", () => {
+    state.merit = Math.max(0, state.merit - 1);
+    haptic();
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
